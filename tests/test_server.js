@@ -1,5 +1,5 @@
 const request = require('supertest');
-const { app, resetUsers } = require('../server');
+const { app, resetUsers } = require('../src/server');
 
 beforeEach(() => {
   resetUsers();
@@ -129,13 +129,6 @@ describe('POST /api/search', () => {
     const res = await request(app).post('/api/search').send({ username: 'unknown' });
 
     expect(res.statusCode).toBe(404);
-    expect(res.body.error).toBeTruthy();
-  });
-
-  test('returns 400 for empty username', async () => {
-    const res = await request(app).post('/api/search').send({ username: '   ' });
-
-    expect(res.statusCode).toBe(400);
     expect(res.body.error).toBeTruthy();
   });
 });

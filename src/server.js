@@ -25,18 +25,26 @@ function resetUsers() {
 }
 
 app.post('/api/login', (req, res) => {
-  const user = users.find((u) => u.username == req.body.username);
+  const user = findUserByUsername(users,req.body.username);
   if (!user) {
     return res.status(404).json({ error: 'User not found' });
-  } else if (user.password != req.body.password) {
+  } else if (!isPasswordValid(user, req.body.password)) {
     return res.status(401).json({ error: 'Invalid password' });
   } else {
     res.json({ id: user.id, username: user.username });
   }
 });
 
+function findUserByUsername(users, user) {
+  return users.find((u) => u.username == user);
+}
+
+function isPasswordValid(user,password) {
+  return user.password === password;
+}
+
 app.post('/api/register', (req, res) => {
-  const user = users.find((u) => u.username == req.body.username);
+  const user = findUserByUsername(users,req.body.username);
   if (!user) {
     const newUser = users.push({
       id: users.at(-1).id + 1,
@@ -50,7 +58,7 @@ app.post('/api/register', (req, res) => {
 });
 
 app.get('/user/:id', (req, res) => {
-  const user = users.find((u) => String(u.id) === req.params.id);
+  const user = findUserById(users,req.params.id);
   if (!user) {
     return res.status(404).send('User not found');
   }
@@ -58,8 +66,12 @@ app.get('/user/:id', (req, res) => {
   res.sendFile(path.join(__dirname,'..' ,'static', 'user.html'));
 });
 
+function findUserById(users, id) {
+  return users.find((u) => String(u.id) === id);
+}
+
 app.get('/api/user/:id', (req, res) => {
-  const user = users.find((u) => String(u.id) === req.params.id);
+  const user = findUserById(users,req.params.id);
   if (!user) {
     return res.status(404).json({ error: 'User is not found' });
   }
@@ -76,12 +88,12 @@ if (require.main === module) {
 }
 
 app.post('/api/search', (req, res) => {
-  const searchUser = users.find((u) => req.body.username == u.username);
+  const searchUser = findUserByUsername(users,req.body.username);
   if (searchUser) {
-    res.json(searchUser);
+    res.json({ id: searchUser.id, username: searchUser.username });
   } else {
     return res.status(404).json({ error: 'User is not found' });
   }
 });
 
-module.exports = { app, resetUsers };
+module.exports = { app, resetUsers, findUserByUsername, findUserById, isPasswordValid };

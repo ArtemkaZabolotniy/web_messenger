@@ -4,7 +4,7 @@
   "description": "test",
   "main": "localStorage.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest --testRegex test_server\\.js$",
     "start": "node server.js"
   },
   "keywords": [],
@@ -17,5 +17,8 @@
   "directories": {
     "test": "tests"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "jest": "^30.3.0",
+    "supertest": "^7.2.2"
+  }
 }
