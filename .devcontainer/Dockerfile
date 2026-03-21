@@ -2,4 +2,4 @@
 FROM node:22-bookworm
 
 # Bake system libraries needed by playwright into the image
-RUN npx playwright install-deps
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive npx playwright install-deps

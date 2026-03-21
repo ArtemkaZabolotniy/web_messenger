@@ -3,8 +3,6 @@
   "build": {
     "dockerfile": "Dockerfile"
   },
-  
-  "remoteUser": "node",
 
   // where to save browser binaries for playwright?
   "containerEnv": {
@@ -21,7 +19,7 @@
 
   // npm ci - enforces exact setup from package-lock.json
   // npx playwright install - installs browser binaries (into cached folder mapped to named volume in previous step)
-  "postCreateCommand": "mkdir -p node_modules /home/node/.cache/ms-playwright && sudo chown node:node node_modules /home/node/.cache/ms-playwright && npm ci && npx playwright install",
+  "postCreateCommand": "npm ci && npx playwright install",
 
   // 4. Give the developer the right tools automatically
   "customizations": {
