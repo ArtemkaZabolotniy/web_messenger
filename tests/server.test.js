@@ -1,5 +1,5 @@
 const request = require('supertest');
-const { app, resetUsers } = require('../server');
+const { app, resetUsers } = require('../src/server');
 
 beforeEach(() => {
   resetUsers();
