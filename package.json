@@ -4,22 +4,21 @@
   "description": "test",
   "main": "localStorage.js",
   "scripts": {
-    "test": "jest",
-    "start": "node src/server.js",
-    "prepare": "husky"
+    "test": "jest --testRegex test_server\\.js$",
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "ws": "^8.20.0"
   },
   "directories": {
     "test": "tests"
   },
   "devDependencies": {
-    "husky": "^9.1.7",
     "jest": "^30.3.0",
     "supertest": "^7.2.2"
   }

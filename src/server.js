@@ -25,34 +25,40 @@ function resetUsers() {
 }
 
 app.post('/api/login', (req, res) => {
-  const user = users.find((u) => u.username == req.body.username);
+  const user = findUserByUsername(users,req.body.username);
   if (!user) {
     return res.status(404).json({ error: 'User not found' });
-  } else if (user.password != req.body.password) {
+  } else if (!isPasswordValid(user, req.body.password)) {
     return res.status(401).json({ error: 'Invalid password' });
   } else {
     res.json({ id: user.id, username: user.username });
   }
 });
 
-app.post('/api/register', (req, res) => {
-  const userExists = users.find((u) => u.username === req.body.username);
-  if (userExists) {
-    return res.status(409).json({ error: 'User already exists' });
-  }
+function findUserByUsername(users, user) {
+  return users.find((u) => u.username == user);
+}
 
-  const newUser = {
-    id: users.length > 0 ? users.at(-1).id + 1 : 1,
-    username: req.body.username,
-    password: req.body.password,
-  };
-  
-  users.push(newUser);
-  res.status(200).json(newUser); // Fixed: sends the object, not the array length
+function isPasswordValid(user,password) {
+  return user.password === password;
+}
+
+app.post('/api/register', (req, res) => {
+  const user = findUserByUsername(users,req.body.username);
+  if (!user) {
+    const newUser = users.push({
+      id: users.at(-1).id + 1,
+      username: req.body.username,
+      password: req.body.password,
+    });
+    res.json(newUser);
+  } else {
+    return res.status(409).json({ error: 'This user is already existed' });
+  }
 });
 
 app.get('/user/:id', (req, res) => {
-  const user = users.find((u) => String(u.id) === req.params.id);
+  const user = findUserById(users,req.params.id);
   if (!user) {
     return res.status(404).send('User not found');
   }
@@ -60,8 +66,12 @@ app.get('/user/:id', (req, res) => {
   res.sendFile(path.join(__dirname,'..' ,'static', 'user.html'));
 });
 
+function findUserById(users, id) {
+  return users.find((u) => String(u.id) === id);
+}
+
 app.get('/api/user/:id', (req, res) => {
-  const user = users.find((u) => String(u.id) === req.params.id);
+  const user = findUserById(users,req.params.id);
   if (!user) {
     return res.status(404).json({ error: 'User is not found' });
   }
@@ -78,19 +88,12 @@ if (require.main === module) {
 }
 
 app.post('/api/search', (req, res) => {
-  const { username } = req.body;
-  // Check if username is missing, empty, or just spaces
-  if (!username || username.trim() === '') {
-    return res.status(400).json({ error: 'Username is required' });
-  }
-
-  const searchUser = users.find((u) => u.username === username);
+  const searchUser = findUserByUsername(users,req.body.username);
   if (searchUser) {
-    const { password, ...userWithoutPassword } = searchUser; // Security: don't send password
-    res.json(userWithoutPassword);
+    res.json({ id: searchUser.id, username: searchUser.username });
   } else {
-    res.status(404).json({ error: 'User is not found' });
+    return res.status(404).json({ error: 'User is not found' });
   }
 });
 
-module.exports = { app, resetUsers };
+module.exports = { app, resetUsers, findUserByUsername, findUserById, isPasswordValid };
