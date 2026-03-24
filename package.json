@@ -4,7 +4,7 @@
   "description": "test",
   "main": "localStorage.js",
   "scripts": {
-    "test": "jest --testRegex test_server\\.js$",
+    "test": "jest",
     "start": "node server.js"
   },
   "keywords": [],
