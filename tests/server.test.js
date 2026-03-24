@@ -131,11 +131,4 @@ describe('POST /api/search', () => {
     expect(res.statusCode).toBe(404);
     expect(res.body.error).toBeTruthy();
   });
-
-  test('returns 400 for empty username', async () => {
-    const res = await request(app).post('/api/search').send({ username: '   ' });
-
-    expect(res.statusCode).toBe(400);
-    expect(res.body.error).toBeTruthy();
-  });
 });

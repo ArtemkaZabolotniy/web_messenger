@@ -1,4 +1,15 @@
+# node
 node_modules/
+
+#custom
 plans.md
+key-insights.md
+
+# Playwright
 .playwright/
 pw-browsers/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
