@@ -7,10 +7,25 @@ function setupWebSocket(server) {
     console.log('User is online');
 
     socket.on('message', (msg) => {
-      console.log('Message:', msg.toString());
+      const message = msg.toString();
+      const unpackedData = JSON.parse(message);
+      const from = unpackedData.fromId;
+      const to = unpackedData.toId;
+      if(unpackedData.type == 'connect_user') {
+        socket.userId = from;
+      } else if(unpackedData.type == 'sendMsg') {
+      wss.clients.forEach(client => {
+        if(client.userId == to) {
+          const payload = {
+            type:'send_msg',
+            fromId:from,
+            text:unpackedData.text
+          }
+          client.send(JSON.stringify(payload))
+        }
+      })
+      }
     });
-
-    socket.send('Hello from WS');
   });
 }
 

@@ -1,6 +1,7 @@
+
 const chatsContainer = document.querySelector('#chats');
 let currentUser;
-
+let myConnection;
 async function loadUserFromUrl() {
   const parts = window.location.pathname.split('/');
   const id = parts[parts.length - 1];
@@ -14,6 +15,9 @@ async function loadUserFromUrl() {
   }
 
   currentUser = await response.json();
+  if(currentUser) {
+    initWebSocket()
+  }
 }
 const knownUsers = [];
 loadUserFromUrl();
@@ -71,9 +75,24 @@ function getActiveUser (event) {
   activeChat = knownUsers.find((u) => u.id === Number(userId));
 }
 
-const myConnection  = new WebSocket('ws://'+window.location.host);
+function initWebSocket() {
+myConnection  = new WebSocket('ws://'+window.location.host);
 myConnection.onopen = function() {
-   console.log("Server is opened in user");
+   const authPayload = {
+    type:'connect_user',
+    fromId:currentUser.id
+   }
+   myConnection.send(JSON.stringify(authPayload))
+}
+myConnection.onmessage = function (event)  {
+  const unpackedData = JSON.parse(event.data);
+  let chat = document.querySelector('#main_chat');
+  const text = unpackedData.text;
+  chat.innerHTML +=
+  `
+   <div class="friend_massege"><span class="friend_text">${text}</span></div> 
+  `
+}
 }
 
 const sendBtn = document.querySelector('#send_massage');
@@ -81,6 +100,8 @@ const inputValue = document.querySelector('#input_send')
 
 const sendMsg = () => {
   const sendValue = inputValue.value;
+  let chat = document.querySelector('#main_chat');
+  chat.innerHTML +=`<div class="my_massege"><span class="my_text">${sendValue}</span></div>`;
   const fullMsg = {
     type:'sendMsg',
     fromId:currentUser.id,
@@ -90,11 +111,4 @@ const sendMsg = () => {
   myConnection.send(JSON.stringify(fullMsg));
 }
 
-sendBtn.addEventListener('click', sendMsg)
-
-
-myConnection.onmessage = function (event)  {
-  const unpackedData = JSON.parse(event.data);
-  const chat = document.querySelector('#main_chat');
-  chat.innerHTML += unpackedData;
-}
+sendBtn.addEventListener('click', sendMsg);
