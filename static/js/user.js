@@ -1,7 +1,12 @@
-
 const chatsContainer = document.querySelector('#chats');
 let currentUser;
 let myConnection;
+
+const autoScroll = () => {
+  const chat = document.querySelector('#main_chat');
+  chat.scrollTop = chat.scrollHeight;
+};
+
 async function loadUserFromUrl() {
   const parts = window.location.pathname.split('/');
   const id = parts[parts.length - 1];
@@ -15,8 +20,8 @@ async function loadUserFromUrl() {
   }
 
   currentUser = await response.json();
-  if(currentUser) {
-    initWebSocket()
+  if (currentUser) {
+    initWebSocket();
   }
 }
 const knownUsers = [];
@@ -31,7 +36,7 @@ async function searchUser() {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({username:usernameToFind}),
+      body: JSON.stringify({ username: usernameToFind }),
     });
     const findedUser = await response.json();
     if (!response.ok) {
@@ -67,48 +72,57 @@ searchBtn.addEventListener('keydown', searchUser);
 let activeChat;
 
 chatsContainer.addEventListener('click', getActiveUser);
-function getActiveUser (event) {
+function getActiveUser(event) {
   const clickedChat = event.target.closest('.chat');
   if (!clickedChat) return;
 
   const userId = clickedChat.dataset.id;
   activeChat = knownUsers.find((u) => u.id === Number(userId));
+  loadChatHistory(activeChat);
 }
-
+function loadChatHistory(receiver) {
+  const payload = {
+    type: 'load_history',
+    from: currentUser.id,
+    to: receiver,
+  };
+  myConnection.send(JSON.stringify(payload));
+}
 function initWebSocket() {
-myConnection  = new WebSocket('ws://'+window.location.host);
-myConnection.onopen = function() {
-   const authPayload = {
-    type:'connect_user',
-    fromId:currentUser.id
-   }
-   myConnection.send(JSON.stringify(authPayload))
-}
-myConnection.onmessage = function (event)  {
-  const unpackedData = JSON.parse(event.data);
-  let chat = document.querySelector('#main_chat');
-  const text = unpackedData.text;
-  chat.innerHTML +=
-  `
+  myConnection = new WebSocket('ws://' + window.location.host);
+  myConnection.onopen = function () {
+    const authPayload = {
+      type: 'connect_user',
+      fromId: currentUser.id,
+    };
+    myConnection.send(JSON.stringify(authPayload));
+  };
+  myConnection.onmessage = function (event) {
+    const unpackedData = JSON.parse(event.data);
+    let chat = document.querySelector('#main_chat');
+    const text = unpackedData.text;
+    chat.innerHTML += `
    <div class="friend_massege"><span class="friend_text">${text}</span></div> 
-  `
-}
+  `;
+    autoScroll();
+  };
 }
 
 const sendBtn = document.querySelector('#send_massage');
-const inputValue = document.querySelector('#input_send')
+const inputValue = document.querySelector('#input_send');
 
 const sendMsg = () => {
   const sendValue = inputValue.value;
   let chat = document.querySelector('#main_chat');
-  chat.innerHTML +=`<div class="my_massege"><span class="my_text">${sendValue}</span></div>`;
+  chat.innerHTML += `<div class="my_massege"><span class="my_text">${sendValue}</span></div>`;
+  autoScroll();
   const fullMsg = {
-    type:'sendMsg',
-    fromId:currentUser.id,
-    toId:activeChat.id,
-    text:sendValue
-  }
+    type: 'sendMsg',
+    fromId: currentUser.id,
+    toId: activeChat.id,
+    text: sendValue,
+  };
   myConnection.send(JSON.stringify(fullMsg));
-}
+};
 
 sendBtn.addEventListener('click', sendMsg);
