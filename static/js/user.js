@@ -83,8 +83,8 @@ function getActiveUser(event) {
 function loadChatHistory(receiver) {
   const payload = {
     type: 'load_history',
-    from: currentUser.id,
-    to: receiver,
+    fromId: currentUser.id,
+    toId: receiver.id,
   };
   myConnection.send(JSON.stringify(payload));
 }
@@ -99,7 +99,24 @@ function initWebSocket() {
   };
   myConnection.onmessage = function (event) {
     const unpackedData = JSON.parse(event.data);
-    let chat = document.querySelector('#main_chat');
+    const chat = document.querySelector('#main_chat');
+
+    if (unpackedData.type === 'history_data') {
+      chat.innerHTML = '';
+      unpackedData.data.forEach((element) => {
+        const text = element.text;
+        const isMine = element.fromId === currentUser.id;
+
+        chat.innerHTML += `
+   <div class="${isMine ? 'my_massege' : 'friend_massege'}"><span class="${isMine ? 'my_text' : 'friend_text'}">${text}</span></div>
+  `;
+      });
+      autoScroll();
+      return;
+    }
+
+    if (!activeChat || unpackedData.fromId !== activeChat.id) return;
+
     const text = unpackedData.text;
     chat.innerHTML += `
    <div class="friend_massege"><span class="friend_text">${text}</span></div> 
@@ -112,7 +129,9 @@ const sendBtn = document.querySelector('#send_massage');
 const inputValue = document.querySelector('#input_send');
 
 const sendMsg = () => {
+  if (!activeChat) return;
   const sendValue = inputValue.value;
+  if (!sendValue.trim()) return;
   let chat = document.querySelector('#main_chat');
   chat.innerHTML += `<div class="my_massege"><span class="my_text">${sendValue}</span></div>`;
   autoScroll();
