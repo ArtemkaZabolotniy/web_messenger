@@ -99,14 +99,13 @@ function initWebSocket() {
   };
   myConnection.onmessage = function (event) {
     const unpackedData = JSON.parse(event.data);
-    const chat = document.querySelector('#main_chat');
-
+    const friendName = activeChat.username;
+    document.querySelector('#UsernameChat').innerHTML = friendName; 
     if (unpackedData.type === 'history_data') {
       chat.innerHTML = '';
       unpackedData.data.forEach((element) => {
         const text = element.text;
         const isMine = element.fromId === currentUser.id;
-
         chat.innerHTML += `
    <div class="${isMine ? 'my_massege' : 'friend_massege'}"><span class="${isMine ? 'my_text' : 'friend_text'}">${text}</span></div>
   `;
