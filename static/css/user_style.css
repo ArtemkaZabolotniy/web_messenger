@@ -181,3 +181,13 @@ main {
   background-color: #1A252F;
   border: none;
 }
+
+dialog {
+  height: 500px;
+  width: 300px;
+}
+
+dialog::backdrop {
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+}

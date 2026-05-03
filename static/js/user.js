@@ -100,7 +100,7 @@ function initWebSocket() {
   myConnection.onmessage = function (event) {
     const unpackedData = JSON.parse(event.data);
     const friendName = activeChat.username;
-    document.querySelector('#UsernameChat').innerHTML = friendName; 
+    document.querySelector('#UsernameChat').innerHTML = friendName;
     if (unpackedData.type === 'history_data') {
       chat.innerHTML = '';
       unpackedData.data.forEach((element) => {
@@ -123,6 +123,28 @@ function initWebSocket() {
     autoScroll();
   };
 }
+function openModalWindow() {
+  const modalWindow = document.createElement('dialog');
+  modalWindow.className = 'modal_window';
+  document.body.appendChild(modalWindow);
+  modalWindow.showModal();
+  modalWindow.addEventListener('close', () => modalWindow.remove());
+  knownUsers.forEach((u) => {
+    modalWindow.insertAdjacentHTML(
+      'beforeend',
+      `
+        <div class="chat">
+          <div class="left">
+            <img src="/assets/user_icon.png" alt="" class="user_icon" />
+            <span class = 'innerUserName'>${u.username}</span>
+          </div>
+      </div>
+      `
+    );
+  });
+}
+const gropuMakerBtn = document.querySelector('#new-group-btn');
+gropuMakerBtn.addEventListener('click', openModalWindow);
 
 const sendBtn = document.querySelector('#send_massage');
 const inputValue = document.querySelector('#input_send');
