@@ -46,8 +46,9 @@ async function searchUser() {
     const isKnownUser = knownUsers.some(
       (user) => user.id === findedUser.id || user.username === findedUser.username
     );
+    const isSelf = findedUser.id === currentUser.id;
 
-    if (findedUser && !isKnownUser) {
+    if (findedUser && !isKnownUser && !isSelf) {
       knownUsers.push(findedUser);
       document.querySelector('#chats').innerHTML += `
       <div class="chat" data-id='${findedUser.id}'>
@@ -126,11 +127,33 @@ function initWebSocket() {
 function openModalWindow() {
   const modalWindow = document.createElement('dialog');
   modalWindow.className = 'modal_window';
+
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'modal_close_btn';
+  closeBtn.type = 'button';
+  closeBtn.setAttribute('aria-label', 'Close dialog');
+  closeBtn.innerHTML = '&times;';
+  closeBtn.addEventListener('click', () => modalWindow.close());
+
+  const modalCards = document.createElement('div');
+  modalCards.className = 'modal-cards';
+
+  modalWindow.appendChild(closeBtn);
+  modalWindow.appendChild(modalCards);
+  modalWindow.insertAdjacentHTML(
+    'beforeend',
+    `
+      <div id="group-create-panel" class="group-create-panel--modal">
+        <input type="text" id="group-name-input" placeholder="Enter group name" />
+        <button id="create-group-btn" type="button">Create Group</button>
+      </div>
+    `
+  );
   document.body.appendChild(modalWindow);
   modalWindow.showModal();
   modalWindow.addEventListener('close', () => modalWindow.remove());
   knownUsers.forEach((u) => {
-    modalWindow.insertAdjacentHTML(
+    modalCards.insertAdjacentHTML(
       'beforeend',
       `
         <div class="chat">
