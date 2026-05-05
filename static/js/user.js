@@ -124,6 +124,7 @@ function initWebSocket() {
     autoScroll();
   };
 }
+let createNewGroup;
 function openModalWindow() {
   const modalWindow = document.createElement('dialog');
   modalWindow.className = 'modal_window';
@@ -150,22 +151,44 @@ function openModalWindow() {
     `
   );
   document.body.appendChild(modalWindow);
+  createNewGroup = document.querySelector('#create-group-btn');
   modalWindow.showModal();
   modalWindow.addEventListener('close', () => modalWindow.remove());
   knownUsers.forEach((u) => {
     modalCards.insertAdjacentHTML(
       'beforeend',
       `
-        <div class="chat">
+        <div class="chat" data-status="false">
           <div class="left">
             <img src="/assets/user_icon.png" alt="" class="user_icon" />
-            <span class = 'innerUserName'>${u.username}</span>
+            <span class = 'innerUserName' data-user-name='${u.username}'>${u.username}</span>
           </div>
       </div>
       `
     );
   });
+  modalCards.addEventListener('click', (e) => {
+    let chat = e.target.closest('.chat');
+    chat.dataset.dataStatus = e.target.closest('.chat').dataset.dataStatus === "true" ? "false" : "true";
+  })
+  createNewGroup.addEventListener('click', () => {
+    const allChats = modalCards.querySelectorAll('.chat');
+    const name = document.querySelector('#group-name-input').value;
+    let payload = {
+      type:"group_create",
+      grouName:name,
+      people:[]
+    }
+    allChats.forEach(chat => {
+      if(chat.dataset.dataStatus === "true") {
+        const userForGroupCreate = chat.querySelector('.innerUserName').dataset.userName;
+        payload.people.push(userForGroupCreate)
+      }
+    })
+    myConnection.send(JSON.stringify(payload))
+  });
 }
+function greateGroup() {}
 const gropuMakerBtn = document.querySelector('#new-group-btn');
 gropuMakerBtn.addEventListener('click', openModalWindow);
 
